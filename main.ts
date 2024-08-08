@@ -1,17 +1,19 @@
 
+function square (a:number) {
+  return a * a;
+}
 
 const width = 1024;
 const height = 768;
 
-class Breakout {
+class Wildlife {
   canvas: HTMLCanvasElement;
   context: CanvasRenderingContext2D;
-  paddleWidth:number;
   leftPressed:boolean;
   rightPressed:boolean;
-  snakeX: number;
-  snakeY: number;
-  bodyWidth: number;
+  snakeX: number[];
+  snakeY: number[];
+  bodyWidth: number[];
   downPressed: boolean;
   upPressed: boolean;
   bodySpeed: number;
@@ -30,11 +32,10 @@ class Breakout {
     this.rightPressed=false;
     this.upPressed=false;
     this.downPressed=false;
-    this.paddleWidth=200;
-    this.snakeX=width/2
-    this.snakeY=height/2;
-    this.bodyWidth=30;
-    this.bodySpeed=10
+    this.snakeX=[width/2,width/2+10,width/2+20];
+    this.snakeY=[height/2,height/2+10,height/2+20];
+    this.bodyWidth=[10,8,7];
+    this.bodySpeed=2;
     document.addEventListener("keydown", this.keypressed.bind(this));
     document.addEventListener("keyup", this.keyreleased.bind(this));
     requestAnimationFrame(this.draw.bind(this));
@@ -71,18 +72,34 @@ class Breakout {
     this.canvas.width=width;
     this.canvas.height=height;
     if (this.leftPressed){
-      this.snakeX-=this.bodySpeed;
+      this.snakeX[0]-=this.bodySpeed;
     }
     if (this.rightPressed){
-      this.snakeX+=this.bodySpeed;
+      this.snakeX[0]+=this.bodySpeed;
     }
     if (this.downPressed){
-      this.snakeY+=this.bodySpeed;
+      this.snakeY[0]+=this.bodySpeed;
     }
     if (this.upPressed){
-      this.snakeY-=this.bodySpeed;
+      this.snakeY[0]-=this.bodySpeed;
     }
-    
+    for(var i = 0,len = this.snakeX.length; i+1 < len; i+=1) {
+      var currentIndex = i + 1;
+      var previousIndex = i;
+      var previousX = this.snakeX[previousIndex];
+      var previousY = this.snakeY[previousIndex];
+      var currentX = this.snakeX[currentIndex];
+      var currentY = this.snakeY[currentIndex];
+      var dist = Math.sqrt(square(previousX-currentX)+square(previousY-currentY));
+      var nextDistance = (this.bodyWidth[previousIndex]+this.bodyWidth[currentIndex])/2;
+      var dirX = (currentX-previousX)/dist;
+      var dirY = (currentY-previousY)/dist;
+      var biggerDirX = dirX * nextDistance;
+      var biggerDirY = dirY * nextDistance;
+      this.snakeX[currentIndex] = previousX + biggerDirX;
+      this.snakeY[currentIndex] = previousY + biggerDirY;
+
+    }
     requestAnimationFrame(this.draw.bind(this));
     const ctx:CanvasRenderingContext2D = this.context;
     ctx.fillStyle=`rgb(56,155,195)`;
@@ -95,14 +112,16 @@ class Breakout {
     ctx.fillStyle=`rgb(128,128,0)`;
 
     /////////ctx.fillRect(this.snakeX,this.snakeY,this.bodyWidth,this.bodyWidth);
-    ctx.beginPath();
-    ctx.ellipse(this.snakeX,this.snakeY,this.bodyWidth,this.bodyWidth,0,0, 2*Math.PI);
-    ctx.stroke();
+    for(var i = 0,len = this.snakeX.length;i < len;i+=1) {
+      ctx.beginPath();
+      ctx.ellipse(this.snakeX[i],this.snakeY[i],this.bodyWidth[i],this.bodyWidth[i],0,0, 2*Math.PI);
+      ctx.stroke();
+    }
   }
 }
 
 
 
 onload=function(){
-  new Breakout();
+  new Wildlife();
 }
