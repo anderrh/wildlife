@@ -17,6 +17,9 @@ class Wildlife {
   downPressed: boolean;
   upPressed: boolean;
   bodySpeed: number;
+  dirSnakeX: number[];
+  dirSnakeY: number[];
+  turnspeed: number;
 
   constructor() {
     this.canvas = document.createElement("canvas") as HTMLCanvasElement;
@@ -32,9 +35,20 @@ class Wildlife {
     this.rightPressed=false;
     this.upPressed=false;
     this.downPressed=false;
-    this.snakeX=[width/2,width/2+10,width/2+20];
-    this.snakeY=[height/2,height/2+10,height/2+20];
-    this.bodyWidth=[10,8,7];
+    this.turnspeed=0.04;
+    this.snakeX=[];
+    this.snakeY=[];
+    this.dirSnakeX=[];
+    this.dirSnakeY=[];
+    this.bodyWidth=[9,10,10,9,9,8,7,7,7,7,6,6,6,7,7,7,7,7,7,8,9,10,10,9,9,8,7,7,6,5];
+    var numSegments = 30;
+    for (var i = 0; i < numSegments; i++) {
+      this.snakeX.push(width/2+i);
+      this.snakeY.push(height/2+i);
+      this.dirSnakeX.push(0);
+      this.dirSnakeY.push(1);
+      
+    }
     this.bodySpeed=2;
     document.addEventListener("keydown", this.keypressed.bind(this));
     document.addEventListener("keyup", this.keyreleased.bind(this));
@@ -71,17 +85,32 @@ class Wildlife {
   private draw(){
     this.canvas.width=width;
     this.canvas.height=height;
-    if (this.leftPressed){
-      this.snakeX[0]-=this.bodySpeed;
+    if (this.leftPressed&&this.upPressed){
+      var leftx = this.dirSnakeY[0];
+      var lefty = 0-this.dirSnakeX[0];
+      this.dirSnakeX[0] += leftx * this.turnspeed;
+      this.dirSnakeY[0] += lefty * this.turnspeed;
+      
     }
-    if (this.rightPressed){
-      this.snakeX[0]+=this.bodySpeed;
+    if (this.rightPressed&&this.upPressed){
+      var rightx = 0-this.dirSnakeY[0];
+      var righty = this.dirSnakeX[0];
+      this.dirSnakeX[0] += rightx * this.turnspeed;
+      this.dirSnakeY[0] += righty * this.turnspeed;
+      
+      
+    }
+    var dist = Math.sqrt(square(this.dirSnakeX[0])+square(this.dirSnakeY[0]));
+    if (dist) {
+      this.dirSnakeX[0] /= dist;
+      this.dirSnakeY[0] /= dist;
     }
     if (this.downPressed){
-      this.snakeY[0]+=this.bodySpeed;
+      
     }
     if (this.upPressed){
-      this.snakeY[0]-=this.bodySpeed;
+      this.snakeX[0]+=(this.dirSnakeX[0]*this.bodySpeed);
+      this.snakeY[0]+=(this.dirSnakeY[0]*this.bodySpeed);
     }
     for(var i = 0,len = this.snakeX.length; i+1 < len; i+=1) {
       var currentIndex = i + 1;
@@ -98,7 +127,8 @@ class Wildlife {
       var biggerDirY = dirY * nextDistance;
       this.snakeX[currentIndex] = previousX + biggerDirX;
       this.snakeY[currentIndex] = previousY + biggerDirY;
-
+      this.dirSnakeX[currentIndex] = -dirX;
+      this.dirSnakeY[currentIndex] = -dirY;
     }
     requestAnimationFrame(this.draw.bind(this));
     const ctx:CanvasRenderingContext2D = this.context;
