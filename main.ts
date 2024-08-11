@@ -35,14 +35,16 @@ class Wildlife {
     this.rightPressed=false;
     this.upPressed=false;
     this.downPressed=false;
-    this.turnspeed=0.04;
+    this.turnspeed=0.03;
     this.snakeX=[];
     this.snakeY=[];
     this.dirSnakeX=[];
     this.dirSnakeY=[];
-    this.bodyWidth=[9,10,10,9,9,8,7,7,7,7,6,6,6,7,7,7,7,7,7,8,9,10,10,9,9,8,7,7,6,5];
-    var numSegments = 30;
+    var animalSize = 0.50;
+    this.bodyWidth=[9,10,10,9,9,9,7,7,7,7,6,6,6,7,7,7,7,7,7,8,9,10,10,9,9,8,7,7,7,7,7,8,10,9,9,8,7,7,7,7,6,6,6,7,7,7,7,7,7,8,9,10,10,9,9,8,7,7,7,8,9,10,10,9,9,8,7,7,7,7,6,6,6,7,7,7,7,7,7,8,9,10,10,9,9,8,7,7,7,7,7,8,10,9,9,8,7,7,7,7,6,6,6,7,7,7,7,7,7,8,9,10,10,9,9,8,7,7,6,5];
+    var numSegments = this.bodyWidth.length;
     for (var i = 0; i < numSegments; i++) {
+      this.bodyWidth[i]*=animalSize;
       this.snakeX.push(width/2+i);
       this.snakeY.push(height/2+i);
       this.dirSnakeX.push(0);
@@ -82,6 +84,16 @@ class Wildlife {
       this.downPressed=true;
     }    
   }
+  private segmentLeft(index:number) {
+    var leftx = this.dirSnakeY[index];
+    var lefty = 0-this.dirSnakeX[index];
+    return [leftx,lefty];
+  }
+  private segmentRight(index:number) {
+    var rightx = 0-this.dirSnakeY[index];
+    var righty = this.dirSnakeX[index];
+    return [rightx,righty];
+  }
   private draw(){
     this.canvas.width=width;
     this.canvas.height=height;
@@ -120,7 +132,7 @@ class Wildlife {
       var currentX = this.snakeX[currentIndex];
       var currentY = this.snakeY[currentIndex];
       var dist = Math.sqrt(square(previousX-currentX)+square(previousY-currentY));
-      var nextDistance = (this.bodyWidth[previousIndex]+this.bodyWidth[currentIndex])/2;
+      var nextDistance = (this.bodyWidth[previousIndex]+this.bodyWidth[currentIndex]);
       var dirX = (currentX-previousX)/dist;
       var dirY = (currentY-previousY)/dist;
       var biggerDirX = dirX * nextDistance;
@@ -139,12 +151,35 @@ class Wildlife {
     ctx.fillRect(0,0,width,10);
     ctx.fillRect(width-10,0,10,height);
     ctx.fillRect(0,height-10,width,10);
-    ctx.fillStyle=`rgb(128,128,0)`;
+    ctx.fillStyle=`rgb(30,200,30)`;
+    ctx.strokeStyle=`rgb(10,60,10)`;
 
     /////////ctx.fillRect(this.snakeX,this.snakeY,this.bodyWidth,this.bodyWidth);
     for(var i = 0,len = this.snakeX.length;i < len;i+=1) {
-      ctx.beginPath();
-      ctx.ellipse(this.snakeX[i],this.snakeY[i],this.bodyWidth[i],this.bodyWidth[i],0,0, 2*Math.PI);
+      //ctx.beginPath();
+      var nextI = i;
+      var prevI = i;
+      if (i + 1 < len) {
+        nextI = i+1;
+      }
+      if (i > 0) {
+        prevI = i - 1;
+      }
+      var radius = this.bodyWidth[i];
+      radius +=(this.bodyWidth [prevI] + this.bodyWidth [nextI])/2;
+      //if (this.snakeX.length != i+1)
+        //var curRadius = this.bodyWidth[i];
+        //var prevRadius = this.bodyWidth[i+1];
+        //ctx.beginPath(); // Start a new path
+        //ctx.moveTo(this.snakeX[i] + this.segmentLeft(i)[0]*curRadius,this.snakeY[i] + this.segmentLeft(i)[1]*curRadius); // Move the pen to (30, 50)
+        //ctx.lineTo(this.snakeX[i+1] + this.segmentLeft(i+1)[0]*prevRadius,this.snakeY[i+1] + this.segmentLeft(i+1)[1]*prevRadius); // Draw a line to (150, 100)
+        //ctx.moveTo(this.snakeX[i] + this.segmentRight(i)[0]*curRadius,this.snakeY[i] + this.segmentRight(i)[1]*curRadius); // Move the pen to (30, 50)
+        //ctx.lineTo(this.snakeX[i+1] + this.segmentRight(i+1)[0]*prevRadius,this.snakeY[i+1] + this.segmentRight(i+1)[1]*prevRadius); // Draw a line to (150, 100)
+        //ctx.stroke();
+      //}
+      ctx.beginPath()
+      ctx.ellipse(this.snakeX[i],this.snakeY[i],radius,radius,0,0, 2*Math.PI);
+      ctx.fill();
       ctx.stroke();
     }
   }
