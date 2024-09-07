@@ -20,6 +20,8 @@ class Wildlife {
   dirSnakeX: number[];
   dirSnakeY: number[];
   turnspeed: number;
+  widthStyles: number[];
+  animalSize: number;
 
   constructor() {
     this.canvas = document.createElement("canvas") as HTMLCanvasElement;
@@ -40,11 +42,16 @@ class Wildlife {
     this.snakeY=[];
     this.dirSnakeX=[];
     this.dirSnakeY=[];
-    var animalSize = 0.50;
-    this.bodyWidth=[9,10,10,9,9,9,7,7,7,7,6,6,6,7,7,7,7,7,7,8,9,10,10,9,9,8,7,7,7,7,7,8,10,9,9,8,7,7,7,7,6,6,6,7,7,7,7,7,7,8,9,10,10,9,9,8,7,7,7,8,9,10,10,9,9,8,7,7,7,7,6,6,6,7,7,7,7,7,7,8,9,10,10,9,9,8,7,7,7,7,7,8,10,9,9,8,7,7,7,7,6,6,6,7,7,7,7,7,7,8,9,10,10,9,9,8,7,7,6,5];
-    var numSegments = this.bodyWidth.length;
+    this.animalSize = 0.50;
+    this.widthStyles=[9,10,10,9,9,9,7,7,7,7,6,6,6,7,7,7,7,7,7,8,9,10,10,9,9,8,7,7,7,7,7,8,10,9,9,8,7,7,7,7,6,6,6,7,7,7,7,7,7,8,9,10,10,9,9,8,7,7,7,8,9,10,10,9,9,8,7,7,7,7,6,6,6,7,7,7,7,7,7,8,9,10,10,9,9,8,7,7,7,7,7,8,10,9,9,8,7,7,7,7,6,6,6,7,7,7,7,7,7,8,9,10,10,9,9,8,7,7,7,7];
+    var numSegments = 3;
+    this.bodyWidth=[];
     for (var i = 0; i < numSegments; i++) {
-      this.bodyWidth[i]*=animalSize;
+      this.bodyWidth.push(this.widthStyles[i]);
+    }
+
+    for (var i = 0; i < this.numSegments(); i++) {
+      this.bodyWidth[i]*=this.animalSize;
       this.snakeX.push(width/2+i);
       this.snakeY.push(height/2+i);
       this.dirSnakeX.push(0);
@@ -55,6 +62,10 @@ class Wildlife {
     document.addEventListener("keydown", this.keypressed.bind(this));
     document.addEventListener("keyup", this.keyreleased.bind(this));
     requestAnimationFrame(this.draw.bind(this));
+  }
+  private numSegments()
+  {
+    return this.bodyWidth.length;
   }
   private keyreleased(e:KeyboardEvent){
     if (e.key==="ArrowLeft"){
@@ -71,6 +82,9 @@ class Wildlife {
     }  
   }
   private keypressed(e:KeyboardEvent){
+    if (e.key==="g"){
+      this.grow();
+    }
     if (e.key==="ArrowLeft"){
       this.leftPressed=true;
     }
@@ -84,6 +98,17 @@ class Wildlife {
       this.downPressed=true;
     }    
   }
+  private grow() {
+    var lastsegment = this.numSegments()-1
+    var whichStyle = this.numSegments()%this.widthStyles.length;
+    this.bodyWidth.push(this.animalSize * this.widthStyles[whichStyle]);
+    this.snakeX.push(this.snakeX[lastsegment]-this.dirSnakeX[lastsegment]);
+    this.snakeY.push(this.snakeY[lastsegment]-this.dirSnakeY[lastsegment]);
+    this.dirSnakeX.push(0);
+    this.dirSnakeY.push(1);
+      
+  }
+
   private segmentLeft(index:number) {
     var leftx = this.dirSnakeY[index];
     var lefty = 0-this.dirSnakeX[index];
@@ -95,6 +120,8 @@ class Wildlife {
     return [rightx,righty];
   }
   private draw(){
+    
+     
     this.canvas.width=width;
     this.canvas.height=height;
     if (this.leftPressed&&this.upPressed){
